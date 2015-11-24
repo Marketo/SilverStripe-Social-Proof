@@ -5,6 +5,10 @@
     "require": {
         "silverstripe/queuedjobs": "2.8.3"
     },
+    "dist": {
+        "url": "git@stash.stripetheweb.com:sp/social-proof.git",
+        "type": "git"
+    },
     "license": "BSD-3-Clause",
     "authors": [
         {

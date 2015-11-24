@@ -15,5 +15,6 @@
             "name": "Kirk Mayo",
             "email": "kirk@stripetheweb.com"
         }
-    ]
+    ],
+    "minimum-stability": "dev"
 }

@@ -18,6 +18,12 @@ class URLStatistics extends DataObject
         'Count' => 'Int'
     );
 
+    private static $summary_fields = array(
+        'Service',
+        'Action',
+        'Count'
+    );
+
     private static $has_one = array(
         'URL' => 'SocialURL'
     );

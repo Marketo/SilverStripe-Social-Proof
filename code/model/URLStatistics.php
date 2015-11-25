@@ -12,7 +12,6 @@ class URLStatistics extends DataObject
     private static $plural_name = 'Social Action';
 
     private static $db = array(
-        'URL' => 'Varchar(1024)',
         'Service' => "Enum('Facebook, Google, Linkedin, Twitter','')",
         'Action' => 'Varchar',
         'Count' => 'Int'

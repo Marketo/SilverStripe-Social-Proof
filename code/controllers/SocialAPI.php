@@ -13,12 +13,12 @@ class SocialAPI extends Controller
     );
 
     private static $url_handlers = array(
-        'countsfor'
-            => 'countsfor'
+        'countsfor/$SERVICE/$FILTER'
+            => 'countsFor'
     );
 
-    public function countsfor() {
-        $urls = explode(',',$this->request->getVar('pageUrl'));
+    public function countsFor() {
+        $urls = explode(',',$this->request->getVar('urls'));
         // queue all urls to be checked
         foreach ($urls as $url) {
             $result = SocialQueue::queueURL($url);
@@ -32,11 +32,24 @@ class SocialAPI extends Controller
             return json_encode(array());
         }
         $result = array();
+        // do we need to filter the results any further
+        $service = $this->getRequest()->param('SERVICE');
+        if ($service && $service == 'service') {
+            $filter = $this->getRequest()->param('FILTER');
+        }
         foreach ($urlObjs as $urlObj) {
             foreach ($urlObj->Statistics() as $statistic) {
-                $results['results'][$urlObj->URL][$statistic->Service][] = array(
-                    $statistic->Action => $statistic->Count
-                );
+                if ($filter) {
+                    if (strtoupper($statistic->Service) == strtoupper($filter)) {
+                        $results['results'][$urlObj->URL][$statistic->Service][] = array(
+                            $statistic->Action => $statistic->Count
+                        );
+                    }
+                } else {
+                    $results['results'][$urlObj->URL][$statistic->Service][] = array(
+                        $statistic->Action => $statistic->Count
+                    );
+                }
             }
         }
         return json_encode($results);

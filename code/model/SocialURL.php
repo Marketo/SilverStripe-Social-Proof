@@ -18,8 +18,7 @@ class SocialURL extends DataObject
 
     private static $summary_fields = array(
         'URL',
-        'Active',
-        'Created'
+        'Active'
     );
 
     private static $defaults = array(
@@ -29,10 +28,6 @@ class SocialURL extends DataObject
     private static $has_many = array(
         'Statistics' => 'URLStatistics'
     );
-
-    public function getCreated() {
-        return date('D M Y h:m:i', strtotime($this->original['Created']));
-    }
 }
 
 class SocialURLAdmin extends ModelAdmin {

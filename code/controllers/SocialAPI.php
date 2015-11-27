@@ -31,9 +31,10 @@ class SocialAPI extends Controller
         if (!$urlObjs->count()) {
             return json_encode(array());
         }
-        $result = array();
+        $results = array();
         // do we need to filter the results any further
         $service = $this->getRequest()->param('SERVICE');
+        $filter = null;
         if ($service && $service == 'service') {
             $filter = $this->getRequest()->param('FILTER');
         }

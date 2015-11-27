@@ -12,29 +12,45 @@ class SocialQueue extends DataObject
     private static $plural_name = 'Social Queue';
 
     private static $db = array(
-        'URL' => 'Varchar(1024)',
         'Queued' => 'Boolean'
     );
 
+    private static $has_one = array(
+        'URL' => 'SocialURL'
+    );
+
     private static $summary_fields = array(
-        'URL',
-        'Queued',
-        'Created'
+        'Address',
+        'Queued'
     );
 
     private static $defaults = array(
         'Queued' => 1
     );
 
-    public function getCreated() {
-        return date('D M Y h:m:i', strtotime($this->original['Created']));
+    public function getaddress() {
+        return $this->URL()->URL;
     }
 
     public static function queueURL($url) {
+        $socialUrl = SocialURL::get()
+            ->filter(array(
+                'URL' => $url,
+                'Active' => 1
+            ));
+        if ($socialUrl && $socialUrl->exists()) {
+            $urlID = $socialUrl->first()->ID;
+        } else {
+            $socialUrl = SocialURL::create();
+            $socialUrl->URL = $url;
+            $socialUrl->Active = 1;
+            $socialUrl->write();
+            $urlID = $socialUrl->ID;
+        }
         // check it is not already queued first as we may not need to fire off a curl request
         $queue = SocialQueue::get()
             ->filter(array(
-                'URL' => $url,
+                'URLID' => $urlID,
                 'Queued' => 1
             ));
         if ($queue && $queue->exists()) {
@@ -51,7 +67,7 @@ class SocialQueue extends DataObject
                 return $httpCode;
             }
             $queue = new SocialQueue();
-            $queue->URL = $url;
+            $queue->URLID = $urlID;
             $queue->write();
             return true;
         }

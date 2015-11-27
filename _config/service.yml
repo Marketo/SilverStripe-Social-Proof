@@ -1,0 +1,3 @@
+UpdateSocialStatsJob:
+  services:
+    - FacebookCount

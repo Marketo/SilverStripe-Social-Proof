@@ -11,10 +11,6 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
      */
     private static $regenerate_time = 300;
 
-    private static $services = array(
-        'FacebookCount'
-    );
-
     public function __construct() {
         $this->currentStep = 0;
         $this->totalSteps = SocialQueue::get()
@@ -49,7 +45,8 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
             $this->currentStep++;
             // run any required services
             $result = false;
-            foreach (self::$services as $service) {
+            $services = Config::inst()->get('UpdateSocialStatsJob', 'services');
+            foreach ($services as $service) {
                 $socialService = $service::create($entry->URL());
                 $count = $socialService->getCount();
                 $socialService->setStatistic($count);

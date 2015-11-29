@@ -71,7 +71,7 @@ class SocialQueue extends DataObject
             if ($httpCode < 200 || $httpCode > 302) {
                 return $httpCode;
             }
-            if (!$queue->exists()) {
+            if ($queue && !$queue->exists()) {
                 $queue = new SocialQueue();
                 $queue->URLID = $urlID;
                 $queue->write();

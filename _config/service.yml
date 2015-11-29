@@ -3,3 +3,4 @@ UpdateSocialStatsJob:
     - FacebookCount
     - LinkedinCount
     - GooglePlusCount
+    - TwitterCount

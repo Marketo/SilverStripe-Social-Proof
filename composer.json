@@ -3,7 +3,8 @@
     "description": "Social Media tracking",
     "type": "silverstripe-module",
     "require": {
-        "silverstripe/queuedjobs": "2.8.3"
+        "silverstripe/queuedjobs": "2.8.3",
+        "kmayo-ss/twitter-stripe": "dev-master"
     },
     "license": "BSD-3-Clause",
     "authors": [

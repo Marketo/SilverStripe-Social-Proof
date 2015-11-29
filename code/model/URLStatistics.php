@@ -12,7 +12,7 @@ class URLStatistics extends DataObject
     private static $plural_name = 'Social Action';
 
     private static $db = array(
-        'Service' => "Enum('Facebook, Google, Linkedin, Twitter','')",
+        'Service' => "Varchar",
         'Action' => 'Varchar',
         'Count' => 'Int'
     );

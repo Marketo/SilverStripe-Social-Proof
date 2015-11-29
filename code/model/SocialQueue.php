@@ -50,11 +50,16 @@ class SocialQueue extends DataObject
         // check it is not already queued first as we may not need to fire off a curl request
         $queue = SocialQueue::get()
             ->filter(array(
-                'URLID' => $urlID,
-                'Queued' => 1
-            ));
+                'URLID' => $urlID
+            ))->first();
         if ($queue && $queue->exists()) {
-            return true;
+            if ($queue->Queued == 1) {
+                return true;
+            } else {
+                $queue->Queued = true;
+                $queue->write();
+                return true;
+            }
         }
         // check if this is a valid url first of no point queuing something like foobar
         if (function_exists('curl_init')) {
@@ -66,9 +71,11 @@ class SocialQueue extends DataObject
             if ($httpCode < 200 || $httpCode > 302) {
                 return $httpCode;
             }
-            $queue = new SocialQueue();
-            $queue->URLID = $urlID;
-            $queue->write();
+            if (!$queue->exists()) {
+                $queue = new SocialQueue();
+                $queue->URLID = $urlID;
+                $queue->write();
+            }
             return true;
         }
         return false;

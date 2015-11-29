@@ -1,3 +1,5 @@
 UpdateSocialStatsJob:
   services:
     - FacebookCount
+    - LinkedinCount
+    - GooglePlusCount

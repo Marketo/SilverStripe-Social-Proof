@@ -3,7 +3,7 @@
 /**
  * @author Kirk Mayo <kirk.mayo@solnet.co.nz>
  *
- * A service for facebook interactions for a page
+ * A service to retrieve Facebook interactions for a url
  */
 class FacebookCount extends SocialServiceCount implements SocialServiceInterface {
 

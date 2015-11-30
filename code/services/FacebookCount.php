@@ -10,29 +10,63 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
     public $entry;
     public $service = 'Facebook';
     public $statistic = 'like_count';
+    public $requestCount = 5;
 
-	private function getFacebookCall() {
+	private function getFacebookCall($urls) {
         return 'https://api.facebook.com/method/fql.query' .
-            '?query=select%20%20like_count%20from%20link_stat%20where%20url=%22'
-            . urlencode($this->entry->URL).'%22';
+            '?query=select%20url,like_count%20from%20link_stat%20where%20url%20in("'
+            . urlencode(implode('","', $urls)).'")';
     }
 
-    public function getCount(){
+    public function processQueue(){
+        $i = 0;
+        $step = 0;
+        $urls = array();
+        $noEntries = count($this->queue);
         try {
-            $fileData = file_get_contents($this->getFacebookCall());
+            foreach ($this->queue as $entry) {
+                $i++;
+                $step++;
+                $urls[$entry['ID']] = $entry['URL'];
+                if ($i == $this->requestCount || $step == $noEntries) {
+                    $fileData = file_get_contents($this->getFacebookCall($urls));
+                    if($fileData === FALSE) return 0;
 
-            if($fileData === FALSE) return 0;
+                    $xml = simplexml_load_string($fileData);
 
-            $xml = simplexml_load_string($fileData);
+                    if ($xml->error_code || !$xml->link_stat) {
+                        return false;
+                    }
+                    $results = $xml->link_stat;
+                    $ids = array_flip($urls);
+                    foreach ($results as $result) {
+                        $url = (string)$result->url;
+                        $id = $ids[$url];
+                        $entry = SocialQueue::get_by_id('SocialQueue',$id);
+                        $statistic = URLStatistics::get()
+                            ->filter(array(
+                                'URLID' => $entry->URLID,
+                                'Service' => $this->service,
+                                'Action' => $this->statistic
+                            ))->first();
+                        if (!$statistic || !$statistic->exists()) {
+                            $statistic = URLStatistics::create();
+                            $statistic->URLID = $entry->URLID;
+                            $statistic->Service = $this->service;
+                            $statistic->Action = $this->statistic;
+                        }
+                        $statistic->Count = (int)$result->{$this->statistic};
+                        $statistic->write();
+                        $entry->Queued = 0;
+                        $entry->write();
+                        
+                    }
 
-            if ($xml->error_code || !$xml->link_stat) {
-                return false;
+                    unset($fileData); // free memory
+                    $i = 0;
+                    $urls = array();
+                }
             }
-            $count = $xml->link_stat->{$this->statistic};
-
-            unset($fileData); // free memory
-
-            return intval($count);
 
         } catch (Exception $e) {
             return 0;

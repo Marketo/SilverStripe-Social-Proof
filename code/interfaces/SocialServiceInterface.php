@@ -6,5 +6,5 @@
  * A interface for social media services used for getting counts
  */
 interface SocialServiceInterface {
-    public function getCount();
+    public function processQueue();
 }

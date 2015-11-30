@@ -39,20 +39,21 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
     }
 
     public function process() {
+        $services = array();
+        foreach (Config::inst()->get('UpdateSocialStatsJob', 'services') as $service) {
+            $services[] = $service::create();
+        }
         $queue = SocialQueue::get()
             ->filter('Queued',1);
         foreach ($queue as $entry) {
             $this->currentStep++;
             // run any required services
-            $result = false;
-            $services = Config::inst()->get('UpdateSocialStatsJob', 'services');
             foreach ($services as $service) {
-                $socialService = $service::create($entry->URL());
-                $count = $socialService->getCount();
-                $socialService->setStatistic($count);
+                $socialService = $service->queueEntry($entry);
             }
-            $entry->Queued = 0;
-            $entry->write();
+        }
+        foreach ($services as $service) {
+            $service->processQueue();
         }
         $this->completeJob();
         return;

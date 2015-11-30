@@ -10,10 +10,7 @@ class SocialServiceCount extends Controller
     public $entry;
     public $service;
     public $statistic;
-
-    public function __construct($entry) {
-        $this->entry = $entry;
-    }
+    public $queue;
 
     public function setStatistic($count=0) {
         $stat = URLStatistics::get()
@@ -37,5 +34,12 @@ class SocialServiceCount extends Controller
             $stat->write();
         }
         return true;
+    }
+
+    public function queueEntry($entry) {
+        $this->queue[] = array(
+            'ID' => $entry->ID,
+            'URL' => $entry->URL()->URL
+        );
     }
 }

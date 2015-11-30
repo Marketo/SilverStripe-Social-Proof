@@ -41,6 +41,12 @@ class SocialQueue extends DataObject
         if ($socialUrl && $socialUrl->exists()) {
             $urlID = $socialUrl->first()->ID;
         } else {
+            // are we locking down the domain
+            $checkDomain = Config::inst()->get('SocialProofSettings', 'check_domain');
+            if ($checkDomain) {
+                $match = strstr($url, $checkDomain);
+                if ($match === false) return;
+            }
             $socialUrl = SocialURL::create();
             $socialUrl->URL = $url;
             $socialUrl->Active = 1;

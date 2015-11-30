@@ -4,7 +4,7 @@
     "type": "silverstripe-module",
     "require": {
         "silverstripe/queuedjobs": "2.8.3",
-        "kmayo-ss/twitter-stripe": "1.2.1"
+        "kmayo-ss/twitter-stripe": "1.1.2"
     },
     "license": "BSD-3-Clause",
     "authors": [

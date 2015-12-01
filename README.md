@@ -12,11 +12,42 @@ Kirk Mayo
 * SilverStripe 3.2
 * Access to create cron jobs
 * https://github.com/silverstripe-australia/silverstripe-queuedjobs
+* https://github.com/kmayo-ss/twitter-stripe
 
 ## Documentation
 
 The module is used query social statistics for different web pages and store the information
-and provide this information via API
+and provide this information via an API
+
+## Setup
+
+The Twitter service makes use of another SilverStripe module which uses Oauth to use the Twitter API.
+You will need to consult the the Readme file (../twitter-stripe/README.md) for details on setting up the Oauth details.
+The module config.yml also contains a setting under SocialProofSetting which is used to lock the
+urls down to certain domains.
+
+## Services
+
+The module queuries various social media services which are managed via config.yml
+To add another service you will need to extend from the class SocialServiceCount and 
+implement the interface SocialServiceInterface.
+The class will need a processQueue method where you can loop through the inherited property
+queue which contains the urls to be processed.
+You will also need to declare the proerties service and statistic
+
+## API Endpoints
+
+Curently the following API endpoints exist
+
+```
+http://socialproof.stripetheweb.com/api/countsfor?urls=http://[urltobeprocessed]
+http://socialproof.stripetheweb.com/api/countsfor/service/facebook?urls=[urltobeprocessed]
+http://socialproof.stripetheweb.com/api/countsfor/service/twitter?urls=[urltobeprocessed]
+http://socialproof.stripetheweb.com/api/countsfor/service/linkedin?urls=[urltobeprocessed]
+http://socialproof.stripetheweb.com/api/countsfor/service/linkedin?urls=[urltobeprocessed]
+http://socialproof.stripetheweb.com/api/countsfor/service/google?urls=[urltobeprocessed]
+```
+
 
 ## Composer Installation
 
@@ -27,3 +58,5 @@ and provide this information via API
 Document creating and adding more services
 
 Info on using the API to get social stats
+
+Maybe merge the models SocialQueue and SocialURL

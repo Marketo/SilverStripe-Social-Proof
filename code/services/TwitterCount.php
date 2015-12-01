@@ -16,6 +16,10 @@ class TwitterCount extends SocialServiceCount implements SocialServiceInterface 
             foreach ($this->queue as $entry) {
                 $twitter = new SSTwitter();
                 $reply = $twitter->search($entry['URL']);
+                if ($reply->errors) {
+                    $this->errorQueue[] = $entry['URL'];
+                    continue;
+                }
                 $metadata = $reply->statuses;
                 $count = intval($metadata[0]->user->statuses_count);
                 $id = $entry['ID'];
@@ -40,6 +44,6 @@ class TwitterCount extends SocialServiceCount implements SocialServiceInterface 
         } catch (Exception $e) {
             return 0;
         }
-
+        return $this->errorQueue;
     }
 }

@@ -20,6 +20,10 @@ class LinkedinCount extends SocialServiceCount implements SocialServiceInterface
             foreach ($this->queue as $entry) {
                 $this->entry = $entry;
                 $fileData = file_get_contents($this->getLinkedInCall());
+                if ($fileData === FALSE) {
+                    $this->errorQueue[] = $entry['URL'];
+                    continue;
+                }
                 $output = str_replace(array('IN.Tags.Share.handleCount(',');'),'',trim($fileData));
                 if($output !== FALSE) {
                     $json = json_decode($output);
@@ -49,5 +53,6 @@ class LinkedinCount extends SocialServiceCount implements SocialServiceInterface
         } catch (Exception $e) {
             return 0;
         }
+        return $this->errorQueue;
     }
 }

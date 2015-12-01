@@ -11,6 +11,7 @@ class SocialServiceCount extends Controller
     public $service;
     public $statistic;
     public $queue;
+    public $errorQueue;
 
     public function setStatistic($count=0) {
         $stat = URLStatistics::get()

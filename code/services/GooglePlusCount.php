@@ -24,10 +24,18 @@ class GooglePlusCount extends SocialServiceCount implements SocialServiceInterfa
                 curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
                 $curl_results = curl_exec ($curl);
 
-                if(curl_errno($curl)) return 0;
+                if(curl_errno($curl)) {
+                    $this->errorQueue[] = $entry['URL'];
+                    continue;
+                }
                 curl_close ($curl);
 
                 $json = json_decode($curl_results, true);
+
+                if (isset($json['error'])) {
+                    $this->errorQueue[] = $entry['URL'];
+                    continue;
+                }
 
                 $count = intval( $json[0]['result']['metadata']['globalCounts']['count'] );
                 $id = $entry['ID'];
@@ -53,5 +61,6 @@ class GooglePlusCount extends SocialServiceCount implements SocialServiceInterfa
         } catch (Exception $e) {
             return 0;
         }
+        return $this->errorQueue;
     }
 }

@@ -35,7 +35,10 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
                     $xml = simplexml_load_string($fileData);
 
                     if ($xml->error_code || !$xml->link_stat) {
-                        return false;
+                        foreach ($urls as $url) {
+                            $this->errorQueue[] = $url;
+                            continue;
+                        }
                     }
                     $results = $xml->link_stat;
                     $ids = array_flip($urls);
@@ -71,6 +74,6 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
         } catch (Exception $e) {
             return 0;
         }
-
+        return $this->errorQueue;
     }
 }

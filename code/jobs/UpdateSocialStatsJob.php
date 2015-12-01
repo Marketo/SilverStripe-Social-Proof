@@ -52,8 +52,17 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
                 $socialService = $service->queueEntry($entry);
             }
         }
+        $requeue = array();
         foreach ($services as $service) {
-            $service->processQueue();
+            $errors = $service->processQueue();
+            foreach ($errors as $error) {
+                if (!in_array($error, $requeue)) {
+                    $requeue[] = $error;
+                }
+            }
+        }
+        foreach ($requeue as $queue) {
+            SocialQueue::queueURL($queue);
         }
         $this->completeJob();
         return;

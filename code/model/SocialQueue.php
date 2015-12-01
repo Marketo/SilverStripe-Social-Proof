@@ -28,7 +28,7 @@ class SocialQueue extends DataObject
         'Queued' => 1
     );
 
-    public function getaddress() {
+    public function getAddress() {
         return $this->URL()->URL;
     }
 

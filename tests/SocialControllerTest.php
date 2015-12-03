@@ -106,7 +106,6 @@ class  SocialControllerTest extends FunctionalTest {
         $results = $jsonArray['results']; 
         $www = $results[$this->testURL];
         $facebookService = new FacebookCount();
-        $statistics = $facebookService->getStatistics();
         $expectedCount = (count($facebookService->getStatistics()) * 2) + 1;
         $this->assertEquals(count($www,true),$expectedCount);
 

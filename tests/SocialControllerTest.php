@@ -105,7 +105,10 @@ class  SocialControllerTest extends FunctionalTest {
 
         $results = $jsonArray['results']; 
         $www = $results[$this->testURL];
-        $this->assertEquals(count($www,true),5);
+        $facebookService = new FacebookCount();
+        $statistics = $facebookService->getStatistics();
+        $expectedCount = (count($facebookService->getStatistics()) * 2) + 1;
+        $this->assertEquals(count($www,true),$expectedCount);
 
         foreach ($www['Facebook'] as $facebook) {
             foreach ($facebook as $key => $value) {

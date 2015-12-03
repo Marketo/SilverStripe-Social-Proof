@@ -11,14 +11,20 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
     public $service = 'Facebook';
     public $statistic = array(
         'share_count',
-        'like_count'
+        'like_count',
+        'comment_count'
     );
     public $requestCount = 5;
 
 	private function getFacebookCall($urls) {
         return 'https://api.facebook.com/method/fql.query' .
-            '?query=select%20url,share_count,like_count%20from%20link_stat%20where%20url%20in("'
+            '?query=select%20url,share_count,like_count,comment_count%20' .
+            'from%20link_stat%20where%20url%20in("'
             . urlencode(implode('","', $urls)).'")';
+    }
+
+    public function getStatistics() {
+        return $this->statistic;
     }
 
     public function processQueue(){

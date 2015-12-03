@@ -68,11 +68,13 @@ class  SocialProofTest extends SapphireTest {
             ->filter(array(
                 'Service' => 'Facebook'
             ));
+        $facebookService = new FacebookCount();
+        $statistics = $facebookService->getStatistics();
         foreach ($stats as $stat) {
             $this->assertEquals($stat->Service, 'Facebook');
             $this->assertArrayHasKey(
                 $stat->Action,
-                array_flip(array('like_count', 'share_count'))
+                array_flip($statistics)
             );
             $this->assertEquals($stat->Count, 50);
             $this->assertEquals($stat->URLID, $socialURL->ID);

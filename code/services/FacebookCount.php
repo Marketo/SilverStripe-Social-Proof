@@ -28,25 +28,29 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
     }
 
     public function processQueue(){
+        $queue = SocialQueue::get()->filter('Active',1)->last();
+        $queueUrls = (array)unserialize($queue->URLs);
+        $urls = array();
+        $noEntries = count($queueUrls);
         $i = 0;
         $step = 0;
-        $urls = array();
-        $noEntries = count($this->queue);
         try {
-            foreach ($this->queue as $entry) {
+            foreach ($queueUrls as $url) {
                 $i++;
                 $step++;
-                $urls[$entry['ID']] = $entry['URL'];
+                $urls[] = $url;
                 if ($i == $this->requestCount || $step == $noEntries) {
                     $fileData = file_get_contents($this->getFacebookCall($urls));
                     if($fileData === FALSE) {
-                        $this->errorQueue[] = $url;
+                        foreach ($urls as $errorUrl) {
+                            $this->errorQueue[] = $url;
+                        }
                     } else {
 
                         $xml = simplexml_load_string($fileData);
 
                         if ($xml->error_code || !$xml->link_stat) {
-                            foreach ($urls as $url) {
+                            foreach ($urls as $errorUrl) {
                                 $this->errorQueue[] = $url;
                                 continue;
                             }
@@ -54,12 +58,10 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
                         $results = $xml->link_stat;
                         $ids = array_flip($urls);
                         foreach ($results as $result) {
-                            $url = (string)$result->url;
-                            $id = $ids[$url];
-                            $entry = SocialQueue::get_by_id('SocialQueue',$id);
+                            $resultUrl = (string)$result->url;
                             $statistics = URLStatistics::get()
                                 ->filter(array(
-                                    'URLID' => $entry->URLID,
+                                    'URL' => $resultUrl,
                                     'Service' => $this->service,
                                     'Action' => $this->statistic
                                 ));
@@ -71,7 +73,7 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
                             } else {
                                 foreach($this->statistic as $countStat) {
                                     $statistic = URLStatistics::create();
-                                    $statistic->URLID = $entry->URLID;
+                                    $statistic->URL = $resultUrl;
                                     $statistic->Service = $this->service;
                                     $statistic->Action = $countStat;
                                     $statistic->Count = (int)$result->{$statistic->Action};
@@ -85,13 +87,13 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
                                         // do we have this in the db
                                         $stat = URLStatistics::get()
                                             ->filter(array(
-                                            'URLID' => $entry->URLID,
+                                            'URL' => $resultUrl,
                                             'Service' => $this->service,
                                             'Action' => $statistic
                                         ))->first();;
                                         if (!$stat || !$stat->exists()) {
                                             $stat = URLStatistics::create();
-                                            $stat->URLID = $entry->URLID;
+                                            $stat->URL = $resultUrl;
                                             $stat->Service = $this->service;
                                             $stat->Action = $statistic;
                                             $stat->Count = (int)$result->{$statistic};
@@ -100,8 +102,6 @@ class FacebookCount extends SocialServiceCount implements SocialServiceInterface
                                     }
                                 }
                             }
-                            $entry->Queued = 0;
-                            $entry->write();
                         }
                     }
 

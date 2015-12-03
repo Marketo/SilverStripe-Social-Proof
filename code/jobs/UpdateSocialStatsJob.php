@@ -10,12 +10,15 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
      * @var int
      */
     private static $regenerate_time = 300;
+    private $queue;
 
     public function __construct() {
         $this->currentStep = 0;
-        $this->totalSteps = SocialQueue::get()
-            ->filter('Queued',1)
-            ->count();
+        $queue = SocialQueue::get()
+            ->filter('Active',1)
+            ->last();
+        $this->totalSteps = count(unserialize($queue->URLs));
+        $this->queue = $queue;
     }
 
     public function getJobType() {
@@ -43,15 +46,6 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
         foreach (Config::inst()->get('UpdateSocialStatsJob', 'services') as $service) {
             $services[] = $service::create();
         }
-        $queue = SocialQueue::get()
-            ->filter('Queued',1);
-        foreach ($queue as $entry) {
-            $this->currentStep++;
-            // run any required services
-            foreach ($services as $service) {
-                $socialService = $service->queueEntry($entry);
-            }
-        }
         $requeue = array();
         foreach ($services as $service) {
             $errors = $service->processQueue();
@@ -72,6 +66,8 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
      * Setup the next cron job
      */
     protected function completeJob() {
+        $this->queue->Active = 0;
+        $this->queue->write();
         $this->isComplete = true;
         $nextgeneration = new UpdateSocialStatsJob();
         singleton('QueuedJobService')

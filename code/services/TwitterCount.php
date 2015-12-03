@@ -13,33 +13,32 @@ class TwitterCount extends SocialServiceCount implements SocialServiceInterface 
 
     public function processQueue(){
         try {
-            foreach ($this->queue as $entry) {
+            $queue = SocialQueue::get()->filter('Active',1)->last();
+            $queueUrls = (array)unserialize($queue->URLs);
+            foreach ($queueUrls as $url) {
                 $twitter = new SSTwitter();
-                $reply = $twitter->search($entry['URL']);
+                $reply = $twitter->search($url);
                 if ($reply->errors) {
-                    $this->errorQueue[] = $entry['URL'];
+                    $this->errorQueue[] = $url;
                     continue;
                 }
                 $metadata = $reply->statuses;
                 $count = intval($metadata[0]->user->statuses_count);
                 $id = $entry['ID'];
-                $entry = SocialQueue::get_by_id('SocialQueue',$id);
                 $statistic = URLStatistics::get()
                     ->filter(array(
-                        'URLID' => $entry->URLID,
+                        'URL' => $url,
                         'Service' => $this->service,
                         'Action' => $this->statistic
                     ))->first();
                 if (!$statistic || !$statistic->exists()) {
                     $statistic = URLStatistics::create();
-                    $statistic->URLID = $entry->URLID;
+                    $statistic->URL = $url;
                     $statistic->Service = $this->service;
                     $statistic->Action = $this->statistic;
                 }
                 $statistic->Count = $count;
                 $statistic->write();
-                $entry->Queued = 0;
-                $entry->write();
             }
         } catch (Exception $e) {
             return 0;

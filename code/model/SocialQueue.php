@@ -12,58 +12,32 @@ class SocialQueue extends DataObject
     private static $plural_name = 'Social Queue';
 
     private static $db = array(
-        'Queued' => 'Boolean'
-    );
-
-    private static $has_one = array(
-        'URL' => 'SocialURL'
+        'Active' => 'Boolean',
+        'URLs' => 'Text'
     );
 
     private static $summary_fields = array(
         'Address',
-        'Queued'
+        'Active'
     );
 
     private static $defaults = array(
-        'Queued' => 1
+        'Active' => 1
     );
 
-    public function getAddress() {
-        return $this->URL()->URL;
-    }
-
     public static function queueURL($url) {
-        $socialUrl = SocialURL::get()
-            ->filter(array(
-                'URL' => $url,
-                'Active' => 1
-            ));
-        if ($socialUrl && $socialUrl->exists()) {
-            $urlID = $socialUrl->first()->ID;
-        } else {
-            // are we locking down the domain
-            $checkDomain = Config::inst()->get('SocialProofSettings', 'check_domain');
-            if ($checkDomain) {
-                $match = strstr($url, $checkDomain);
-                if ($match === false) return;
-            }
-            $socialUrl = SocialURL::create();
-            $socialUrl->URL = $url;
-            $socialUrl->Active = 1;
-            $socialUrl->write();
-            $urlID = $socialUrl->ID;
+        // are we locking down the domain
+        $checkDomain = Config::inst()->get('SocialProofSettings', 'check_domain');
+        if ($checkDomain) {
+            $match = strstr($url, $checkDomain);
+            if ($match === false) return;
         }
+        $queuedUrls = array();
         // check it is not already queued first as we may not need to fire off a curl request
-        $queue = SocialQueue::get()
-            ->filter(array(
-                'URLID' => $urlID
-            ))->first();
+        $queue = SocialQueue::get()->filter('Active',1)->last();
         if ($queue && $queue->exists()) {
-            if ($queue->Queued == 1) {
-                return true;
-            } else {
-                $queue->Queued = true;
-                $queue->write();
+            $queuedUrls = (array)unserialize($queue->URLs);
+            if (is_array($queuedUrls) && in_array($url, $queuedUrls)) {
                 return true;
             }
         }
@@ -77,24 +51,15 @@ class SocialQueue extends DataObject
             if ($httpCode < 200 || $httpCode > 302) {
                 return $httpCode;
             }
+            $queuedUrls = (array)$queuedUrls;
+            $queuedUrls[] = $url;
             if (!$queue || !$queue->exists()) {
                 $queue = new SocialQueue();
-                $queue->URLID = $urlID;
-                $queue->write();
             }
+            $queue->URLs = serialize($queuedUrls);
+            $queue->write();
             return true;
         }
         return false;
     }
-}
-
-class SocialQueueAdmin extends ModelAdmin {
-    private static $managed_models = array(
-        'SocialQueue'
-    );
-
-    private static $url_segment = 'social-queue-admin';
-
-    private static $menu_title = 'Social Queue';
-
 }

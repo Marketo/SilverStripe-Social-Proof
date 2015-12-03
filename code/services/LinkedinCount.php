@@ -11,17 +11,18 @@ class LinkedinCount extends SocialServiceCount implements SocialServiceInterface
     public $service = 'Linkedin';
     public $statistic = 'handle_count';
 
-    function getLinkedInCall() {
+    function getLinkedInCall($url='') {
         return 'http://www.linkedin.com/countserv/count/share?url='
-            . urlencode($this->entry['URL']);
+            . urlencode($url);
     }
     function processQueue(){
+        $queue = SocialQueue::get()->filter('Active',1)->last();
+        $queueUrls = (array)unserialize($queue->URLs);
         try {
-            foreach ($this->queue as $entry) {
-                $this->entry = $entry;
-                $fileData = file_get_contents($this->getLinkedInCall());
+            foreach ($queueUrls as $url) {
+                $fileData = file_get_contents($this->getLinkedInCall($url));
                 if ($fileData === FALSE) {
-                    $this->errorQueue[] = $entry['URL'];
+                    $this->errorQueue[] = $url;
                     continue;
                 }
                 $output = str_replace(array('IN.Tags.Share.handleCount(',');'),'',trim($fileData));
@@ -29,24 +30,20 @@ class LinkedinCount extends SocialServiceCount implements SocialServiceInterface
                     $json = json_decode($output);
                     unset($fileData); // free memory
                     $count = intval($json->count);
-                    $id = $entry['ID'];
-                    $entry = SocialQueue::get_by_id('SocialQueue',$id);
                     $statistic = URLStatistics::get()
                         ->filter(array(
-                            'URLID' => $entry->URLID,
+                            'URL' => $url,
                             'Service' => $this->service,
                             'Action' => $this->statistic
                         ))->first();
                     if (!$statistic || !$statistic->exists()) {
                         $statistic = URLStatistics::create();
-                        $statistic->URLID = $entry->URLID;
+                        $statistic->URL = $url;
                         $statistic->Service = $this->service;
                         $statistic->Action = $this->statistic;
                     }
                     $statistic->Count = $count;
                     $statistic->write();
-                    $entry->Queued = 0;
-                    $entry->write();
                 }
             }
 

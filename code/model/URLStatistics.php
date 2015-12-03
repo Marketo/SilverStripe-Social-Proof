@@ -12,7 +12,8 @@ class URLStatistics extends DataObject
     private static $plural_name = 'Social Action';
 
     private static $db = array(
-        'Service' => "Varchar",
+        'URL' => 'Varchar(1024)',
+        'Service' => 'Varchar',
         'Action' => 'Varchar',
         'Count' => 'Int'
     );
@@ -22,8 +23,15 @@ class URLStatistics extends DataObject
         'Action',
         'Count'
     );
+}
 
-    private static $has_one = array(
-        'URL' => 'SocialURL'
+class URLStatisticsAdmin extends ModelAdmin {
+    private static $managed_models = array(
+        'URLStatistics'
     );
+
+    private static $url_segment = 'social-url-admin';
+
+    private static $menu_title = 'Social URLs';
+
 }

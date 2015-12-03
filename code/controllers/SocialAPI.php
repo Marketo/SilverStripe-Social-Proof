@@ -23,10 +23,9 @@ class SocialAPI extends Controller
         foreach ($urls as $url) {
             $result = SocialQueue::queueURL($url);
         }
-        $urlObjs = SocialURL::get()
+        $urlObjs = URLStatistics::get()
             ->filter(array(
-                'URL' => $urls,
-                'Active' => 1
+                'URL' => $urls
             ));
         if (!$urlObjs->count()) {
             return json_encode(array());
@@ -39,18 +38,16 @@ class SocialAPI extends Controller
             $filter = $this->getRequest()->param('FILTER');
         }
         foreach ($urlObjs as $urlObj) {
-            foreach ($urlObj->Statistics() as $statistic) {
-                if ($filter) {
-                    if (strtoupper($statistic->Service) == strtoupper($filter)) {
-                        $results['results'][$urlObj->URL][$statistic->Service][] = array(
-                            $statistic->Action => $statistic->Count
-                        );
-                    }
-                } else {
-                    $results['results'][$urlObj->URL][$statistic->Service][] = array(
-                        $statistic->Action => $statistic->Count
+            if ($filter) {
+                if (strtoupper($urlObj->Service) == strtoupper($filter)) {
+                    $results['results'][$urlObj->URL][$urlObj->Service][] = array(
+                        $urlObj->Action => $urlObj->Count
                     );
                 }
+            } else {
+                $results['results'][$urlObj->URL][$urlObj->Service][] = array(
+                    $urlObj->Action => $urlObj->Count
+                );
             }
         }
         return json_encode($results);

@@ -22,7 +22,6 @@ class  SocialControllerTest extends FunctionalTest {
 
         SocialQueue::queueURL($this->testURL);
 
-        $socialURL = SocialURL::get()->first();
         // now setup a statistics for the URL
         foreach ($this->services as $service) {
             $countService = new $service();
@@ -32,7 +31,7 @@ class  SocialControllerTest extends FunctionalTest {
                     $stat->Service = $countService->service;
                     $stat->Action = $statistic;
                     $stat->Count = 50;
-                    $stat->URLID = $socialURL->ID;
+                    $stat->URL = $this->testURL;
                     $stat->write();
                 }
             } else {
@@ -40,7 +39,7 @@ class  SocialControllerTest extends FunctionalTest {
                 $stat->Service = $countService->service;
                 $stat->Action = $countService->statistic;
                 $stat->Count = 50;
-                $stat->URLID = $socialURL->ID;
+                $stat->URL = $this->testURL;
                 $stat->write();
                 unset($stat);
             }
@@ -56,10 +55,8 @@ class  SocialControllerTest extends FunctionalTest {
         foreach (SocialQueue::get() as $queue) {
             $queue->delete();
         }
-        foreach (SocialURL::get() as $url) {
-            $url->delete();
-        }
         parent::tearDown();
+
     }
 
     public function testAPI() {
@@ -89,8 +86,11 @@ class  SocialControllerTest extends FunctionalTest {
 
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
-        $this->assertEquals($socialQueue->getAddress(), $this->testURL);
+        $this->assertEquals($socialQueue->Active, 1);
+        $this->assertEquals(
+            $socialQueue->URLs,
+            serialize(array($this->testURL))
+        );
     }
 
     public function testFacebookServiceAPI() {
@@ -99,7 +99,7 @@ class  SocialControllerTest extends FunctionalTest {
 
         $body = $request->getBody();
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
+        $this->assertEquals($socialQueue->Active, 1);
 
         $jsonArray = json_decode($body, true);
 
@@ -117,8 +117,11 @@ class  SocialControllerTest extends FunctionalTest {
 
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
-        $this->assertEquals($socialQueue->getAddress(), $this->testURL);
+        $this->assertEquals($socialQueue->Active, 1);
+        $this->assertEquals(
+            $socialQueue->URLs,
+            serialize(array($this->testURL))
+        );
     }
 
     public function testGoogleServiceAPI() {
@@ -127,7 +130,7 @@ class  SocialControllerTest extends FunctionalTest {
 
         $body = $request->getBody();
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
+        $this->assertEquals($socialQueue->Active, 1);
 
         $jsonArray = json_decode($body, true);
 
@@ -140,8 +143,11 @@ class  SocialControllerTest extends FunctionalTest {
 
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
-        $this->assertEquals($socialQueue->getAddress(), $this->testURL);
+        $this->assertEquals($socialQueue->Active, 1);
+        $this->assertEquals(
+            $socialQueue->URLs,
+            serialize(array($this->testURL))
+        );
     }
 
     public function testLinkedinServiceAPI() {
@@ -150,7 +156,7 @@ class  SocialControllerTest extends FunctionalTest {
 
         $body = $request->getBody();
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
+        $this->assertEquals($socialQueue->Active, 1);
 
         $jsonArray = json_decode($body, true);
 
@@ -163,8 +169,11 @@ class  SocialControllerTest extends FunctionalTest {
 
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
-        $this->assertEquals($socialQueue->getAddress(), $this->testURL);
+        $this->assertEquals($socialQueue->Active, 1);
+        $this->assertEquals(
+            $socialQueue->URLs,
+            serialize(array($this->testURL))
+        );
     }
 
     public function testTwitterServiceAPI() {
@@ -173,7 +182,7 @@ class  SocialControllerTest extends FunctionalTest {
 
         $body = $request->getBody();
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
+        $this->assertEquals($socialQueue->Active, 1);
 
         $jsonArray = json_decode($body, true);
 
@@ -186,7 +195,10 @@ class  SocialControllerTest extends FunctionalTest {
 
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
-        $this->assertEquals($socialQueue->Queued, 1);
-        $this->assertEquals($socialQueue->getAddress(), $this->testURL);
+        $this->assertEquals($socialQueue->Active, 1);
+        $this->assertEquals(
+            $socialQueue->URLs,
+            serialize(array($this->testURL))
+        );
     }
 }

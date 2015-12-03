@@ -21,7 +21,6 @@ class  SocialProofTest extends SapphireTest {
         parent::setUp();
 
         SocialQueue::queueURL($this->testURL);
-        $socialURL = SocialURL::get()->first();
 
         // now setup a statistics for the URL
         foreach ($this->services as $service) {
@@ -32,7 +31,7 @@ class  SocialProofTest extends SapphireTest {
                     $stat->Service = $countService->service;
                     $stat->Action = $statistic;
                     $stat->Count = 50;
-                    $stat->URLID = $socialURL->ID;
+                    $stat->URL = $this->testURL;
                     $stat->write();
                 }
             } else {
@@ -40,30 +39,26 @@ class  SocialProofTest extends SapphireTest {
                 $stat->Service = $countService->service;
                 $stat->Action = $countService->statistic;
                 $stat->Count = 50;
-                $stat->URLID = $socialURL->ID;
+                $stat->URL = $this->testURL;
                 $stat->write();
             }
         }
 
     }
 
-    public function testActiveSocialURL() {
-        $socialURL = SocialURL::get()->first();
-
-        $this->assertEquals($socialURL->Active, 1);
-        $this->assertEquals($socialURL->URL, $this->testURL);
-    }
-
     public function testSocialQueue() {
-        $socialURL = SocialURL::get()->first();
-        $socialQueue = SocialQueue::get()->first();
+        $socialQueue = SocialQueue::get()
+            ->filter('Active',1)
+            ->last();
 
-        $this->assertEquals($socialQueue->getAddress(), $socialURL->URL);
-        $this->assertEquals($socialQueue->Queued, 1);
+        $this->assertEquals(
+            $socialQueue->URLs,
+            serialize(array($this->testURL))
+        );
+        $this->assertEquals($socialQueue->Active, 1);
     }
 
     public function testFacebookStat() {
-        $socialURL = SocialURL::get()->first();
         $stats = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Facebook'
@@ -77,12 +72,11 @@ class  SocialProofTest extends SapphireTest {
                 array_flip($statistics)
             );
             $this->assertEquals($stat->Count, 50);
-            $this->assertEquals($stat->URLID, $socialURL->ID);
+            $this->assertEquals($stat->URL, $this->testURL);
         }
     }
 
     public function testGooglePlusStat() {
-        $socialURL = SocialURL::get()->first();
         $stat = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Google'
@@ -90,11 +84,10 @@ class  SocialProofTest extends SapphireTest {
         $this->assertEquals($stat->Service, 'Google');
         $this->assertEquals($stat->Action, 'count');
         $this->assertEquals($stat->Count, 50);
-        $this->assertEquals($stat->URLID, $socialURL->ID);
+        $this->assertEquals($stat->URL, $this->testURL);
     }
 
     public function testLinkedinStat() {
-        $socialURL = SocialURL::get()->first();
         $stat = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Linkedin'
@@ -102,11 +95,10 @@ class  SocialProofTest extends SapphireTest {
         $this->assertEquals($stat->Service, 'Linkedin');
         $this->assertEquals($stat->Action, 'handle_count');
         $this->assertEquals($stat->Count, 50);
-        $this->assertEquals($stat->URLID, $socialURL->ID);
+        $this->assertEquals($stat->URL, $this->testURL);
     }
 
     public function testTwitterStat() {
-        $socialURL = SocialURL::get()->first();
         $stat = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Twitter'
@@ -114,6 +106,6 @@ class  SocialProofTest extends SapphireTest {
         $this->assertEquals($stat->Service, 'Twitter');
         $this->assertEquals($stat->Action, 'statuses_count');
         $this->assertEquals($stat->Count, 50);
-        $this->assertEquals($stat->URLID, $socialURL->ID);
+        $this->assertEquals($stat->URL, $this->testURL);
     }
 }

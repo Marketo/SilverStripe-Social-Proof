@@ -5,9 +5,8 @@
  *
  * A service to retrieve Linkedin interactions for a url
  */
-class LinkedinCount extends SocialServiceCount implements SocialServiceInterface {
+class LinkedinCount extends Controller implements SocialServiceInterface {
 
-    public $entry;
     public $service = 'Linkedin';
     public $statistic = 'handle_count';
 

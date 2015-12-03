@@ -5,9 +5,8 @@
  *
  * A service to retrieve Twitter interactions for a url
  */
-class TwitterCount extends SocialServiceCount implements SocialServiceInterface {
+class TwitterCount extends Controller implements SocialServiceInterface {
 
-    public $entry;
     public $service = 'Twitter';
     public $statistic = 'statuses_count';
 

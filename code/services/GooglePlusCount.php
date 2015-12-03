@@ -5,9 +5,8 @@
  *
  * A service to retrieve Google Plus interactions for a url
  */
-class GooglePlusCount extends SocialServiceCount implements SocialServiceInterface {
+class GooglePlusCount extends Controller implements SocialServiceInterface {
 
-    public $entry;
     public $service = 'Google';
     public $statistic = 'count';
 
@@ -40,7 +39,6 @@ class GooglePlusCount extends SocialServiceCount implements SocialServiceInterfa
                 }
 
                 $count = intval( $json[0]['result']['metadata']['globalCounts']['count'] );
-                $id = $entry['ID'];
                 $statistic = URLStatistics::get()
                     ->filter(array(
                         'URL' => $url,

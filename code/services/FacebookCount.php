@@ -5,9 +5,8 @@
  *
  * A service to retrieve Facebook interactions for a url
  */
-class FacebookCount extends SocialServiceCount implements SocialServiceInterface {
+class FacebookCount extends Controller implements SocialServiceInterface {
 
-    public $entry;
     public $service = 'Facebook';
     public $statistic = array(
         'share_count',

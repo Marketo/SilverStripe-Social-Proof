@@ -29,11 +29,11 @@ urls down to certain domains.
 ## Services
 
 The module queuries various social media services which are managed via config.yml
-To add another service you will need to extend from the class SocialServiceCount and 
-implement the interface SocialServiceInterface.
-The class will need a processQueue method where you can loop through the inherited property
-queue which contains the urls to be processed.
-You will also need to declare the proerties service and statistic
+To add another service you will need to create a class with the properties service and statistics
+as these are used when adding a row to the URLStatistics model.
+The class will also need to declare a method called processQueue which is used in a cron job,
+this is enforced by a interface called SocialServiceInterface which should be implemented in any
+future service classes.
 
 ## API Endpoints
 
@@ -55,8 +55,4 @@ http://socialproof.stripetheweb.com/api/countsfor/service/google?urls=[urltobepr
 
 ## TODO
 
-Document creating and adding more services
-
-Info on using the API to get social stats
-
-Maybe merge the models SocialQueue and SocialURL
+Testing

@@ -21,17 +21,28 @@ class  SocialProofTest extends SapphireTest {
         parent::setUp();
 
         SocialQueue::queueURL($this->testURL);
+        $socialURL = SocialURL::get()->first();
 
         // now setup a statistics for the URL
         foreach ($this->services as $service) {
             $countService = new $service();
-            $socialURL = SocialURL::get()->first();
-            $stat = URLStatistics::create();
-            $stat->Service = $countService->service;
-            $stat->Action = $countService->statistic;
-            $stat->Count = 50;
-            $stat->URLID = $socialURL->ID;
-            $stat->write();
+            if (is_array($countService->statistic)) {
+                foreach ($countService->statistic as $statistic) {
+                    $stat = URLStatistics::create();
+                    $stat->Service = $countService->service;
+                    $stat->Action = $statistic;
+                    $stat->Count = 50;
+                    $stat->URLID = $socialURL->ID;
+                    $stat->write();
+                }
+            } else {
+                $stat = URLStatistics::create();
+                $stat->Service = $countService->service;
+                $stat->Action = $countService->statistic;
+                $stat->Count = 50;
+                $stat->URLID = $socialURL->ID;
+                $stat->write();
+            }
         }
 
     }
@@ -53,14 +64,19 @@ class  SocialProofTest extends SapphireTest {
 
     public function testFacebookStat() {
         $socialURL = SocialURL::get()->first();
-        $stat = URLStatistics::get()
+        $stats = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Facebook'
-            ))->first();
-        $this->assertEquals($stat->Service, 'Facebook');
-        $this->assertEquals($stat->Action, 'like_count');
-        $this->assertEquals($stat->Count, 50);
-        $this->assertEquals($stat->URLID, $socialURL->ID);
+            ));
+        foreach ($stats as $stat) {
+            $this->assertEquals($stat->Service, 'Facebook');
+            $this->assertArrayHasKey(
+                $stat->Action,
+                array_flip(array('like_count', 'share_count'))
+            );
+            $this->assertEquals($stat->Count, 50);
+            $this->assertEquals($stat->URLID, $socialURL->ID);
+        }
     }
 
     public function testGooglePlusStat() {

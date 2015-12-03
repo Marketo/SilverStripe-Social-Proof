@@ -26,13 +26,24 @@ class  SocialControllerTest extends FunctionalTest {
         // now setup a statistics for the URL
         foreach ($this->services as $service) {
             $countService = new $service();
-            $stat = URLStatistics::create();
-            $stat->Service = $countService->service;
-            $stat->Action = $countService->statistic;
-            $stat->Count = 50;
-            $stat->URLID = $socialURL->ID;
-            $stat->write();
-            unset($stat);
+            if (is_array($countService->statistic)) {
+                foreach ($countService->statistic as $statistic) {
+                    $stat = URLStatistics::create();
+                    $stat->Service = $countService->service;
+                    $stat->Action = $statistic;
+                    $stat->Count = 50;
+                    $stat->URLID = $socialURL->ID;
+                    $stat->write();
+                }
+            } else {
+                $stat = URLStatistics::create();
+                $stat->Service = $countService->service;
+                $stat->Action = $countService->statistic;
+                $stat->Count = 50;
+                $stat->URLID = $socialURL->ID;
+                $stat->write();
+                unset($stat);
+            }
         }
 
     }
@@ -61,8 +72,11 @@ class  SocialControllerTest extends FunctionalTest {
         $results = $jsonArray['results']; 
         $www = $results[$this->testURL];
 
-        $facebook = $www['Facebook'][0];
-        $this->assertEquals($facebook['like_count'], 50);
+        foreach ($www['Facebook'] as $facebook) {
+            foreach ($facebook as $key => $value) {
+                $this->assertEquals($facebook[$key], 50);
+            }
+        }
 
         $google = $www['Google'][0];
         $this->assertEquals($google['count'], 50);
@@ -91,10 +105,13 @@ class  SocialControllerTest extends FunctionalTest {
 
         $results = $jsonArray['results']; 
         $www = $results[$this->testURL];
-        $this->assertEquals(count($www,true),3);
+        $this->assertEquals(count($www,true),5);
 
-        $facebook = $www['Facebook'][0];
-        $this->assertEquals($facebook['like_count'], 50);
+        foreach ($www['Facebook'] as $facebook) {
+            foreach ($facebook as $key => $value) {
+                $this->assertEquals($facebook[$key], 50);
+            }
+        }
 
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();

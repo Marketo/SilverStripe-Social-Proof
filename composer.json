@@ -1,5 +1,5 @@
 {
-    "name": "Marketo/SilverStripe-Social-Proof",
+    "name": "marketo/silverstripe-social-proof",
     "description": "Social Media tracking",
     "type": "silverstripe-module",
     "require": {

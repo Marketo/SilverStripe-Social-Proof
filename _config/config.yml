@@ -1,0 +1,8 @@
+UpdateSocialStatsJob:
+  services:
+    - FacebookCount
+    - LinkedinCount
+    - GooglePlusCount
+    - TwitterCount
+SocialProofSettings:
+  check_domain: 'marketo.com'

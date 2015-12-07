@@ -1,5 +1,5 @@
 {
-    "name": "solnet/social-proof",
+    "name": "Marketo/SilverStripe-Social-Proof",
     "description": "Social Media tracking",
     "type": "silverstripe-module",
     "require": {

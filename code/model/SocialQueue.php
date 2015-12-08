@@ -37,29 +37,13 @@ class SocialQueue extends DataObject
         $queue = SocialQueue::get()->filter('Active',1)->last();
         if ($queue && $queue->exists()) {
             $queuedUrls = (array)unserialize($queue->URLs);
-            if (is_array($queuedUrls) && in_array($url, $queuedUrls)) {
-                return true;
-            }
         }
-        // check if this is a valid url first of no point queuing something like foobar
-        if (function_exists('curl_init')) {
-            $handle = curl_init($url);
-            curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
-            $response = curl_exec($handle);
-            $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-            curl_close($handle);
-            if ($httpCode < 200 || $httpCode > 302) {
-                return $httpCode;
-            }
-            $queuedUrls = (array)$queuedUrls;
-            $queuedUrls[] = $url;
-            if (!$queue || !$queue->exists()) {
-                $queue = new SocialQueue();
-            }
-            $queue->URLs = serialize($queuedUrls);
-            $queue->write();
-            return true;
+        $queuedUrls = (array)$queuedUrls;
+        $queuedUrls[] = $url;
+        if (!$queue || !$queue->exists()) {
+            $queue = new SocialQueue();
         }
-        return false;
+        $queue->URLs = serialize($queuedUrls);
+        $queue->write();
     }
 }

@@ -10,10 +10,8 @@ class GooglePlusCount extends Controller implements SocialServiceInterface {
     public $service = 'Google';
     public $statistic = 'count';
 
-    function processQueue(){
+    function processQueue($queueUrls){
         try {
-            $queue = SocialQueue::get()->filter('Active',1)->last();
-            $queueUrls = (array)unserialize($queue->URLs);
             foreach ($queueUrls as $url) {
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL, "https://clients6.google.com/rpc");

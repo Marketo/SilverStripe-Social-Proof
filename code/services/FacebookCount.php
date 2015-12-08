@@ -26,9 +26,7 @@ class FacebookCount extends Controller implements SocialServiceInterface {
         return $this->statistic;
     }
 
-    public function processQueue(){
-        $queue = SocialQueue::get()->filter('Active',1)->last();
-        $queueUrls = (array)unserialize($queue->URLs);
+    public function processQueue($queueUrls){
         $urls = array();
         $noEntries = count($queueUrls);
         $i = 0;

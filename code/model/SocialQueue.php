@@ -33,7 +33,7 @@ class SocialQueue extends DataObject
             if ($match === false) return;
         }
         $queuedUrls = array();
-        // check it is not already queued first as we may not need to fire off a curl request
+        // get the latest queue and add the URL to the queue
         $queue = SocialQueue::get()->filter('Active',1)->last();
         if ($queue && $queue->exists()) {
             $queuedUrls = (array)unserialize($queue->URLs);

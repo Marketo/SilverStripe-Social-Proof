@@ -10,15 +10,23 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
      * @var int
      */
     private static $regenerate_time = 300;
-    private $queue;
+    private $URLs;
 
     public function __construct() {
+        $this->URLs = array();
         $this->currentStep = 0;
         $queue = SocialQueue::get()
             ->filter('Active',1)
             ->last();
-        $this->totalSteps = count(unserialize($queue->URLs));
-        $this->queue = $queue;
+        if ($queue && $queue->exists()) {
+            $this->URLs = (isset($queue->URLs)) 
+            ? unserialize($queue->URLs)
+            : array();
+            $this->totalSteps = count($this->URLs);
+            // stop any further urls being added to this queue
+            $queue->Active = 0;
+            $queue->write();
+        }
     }
 
     public function getJobType() {
@@ -48,7 +56,7 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
         }
         $requeue = array();
         foreach ($services as $service) {
-            $errors = $service->processQueue();
+            $errors = $service->processQueue($this->URLs);
             foreach ($errors as $error) {
                 if (!in_array($error, $requeue)) {
                     $requeue[] = $error;
@@ -66,8 +74,6 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
      * Setup the next cron job
      */
     protected function completeJob() {
-        $this->queue->Active = 0;
-        $this->queue->write();
         $this->isComplete = true;
         $nextgeneration = new UpdateSocialStatsJob();
         singleton('QueuedJobService')

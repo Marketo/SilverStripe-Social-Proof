@@ -14,9 +14,7 @@ class LinkedinCount extends Controller implements SocialServiceInterface {
         return 'http://www.linkedin.com/countserv/count/share?url='
             . urlencode($url);
     }
-    function processQueue(){
-        $queue = SocialQueue::get()->filter('Active',1)->last();
-        $queueUrls = (array)unserialize($queue->URLs);
+    function processQueue($queueUrls){
         try {
             foreach ($queueUrls as $url) {
                 $fileData = file_get_contents($this->getLinkedInCall($url));

@@ -19,6 +19,7 @@ class URLStatistics extends DataObject
     );
 
     private static $summary_fields = array(
+        'URL',
         'Service',
         'Action',
         'Count'

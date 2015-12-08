@@ -10,10 +10,8 @@ class TwitterCount extends Controller implements SocialServiceInterface {
     public $service = 'Twitter';
     public $statistic = 'statuses_count';
 
-    public function processQueue(){
+    public function processQueue($queueUrls){
         try {
-            $queue = SocialQueue::get()->filter('Active',1)->last();
-            $queueUrls = (array)unserialize($queue->URLs);
             foreach ($queueUrls as $url) {
                 $twitter = new SSTwitter();
                 $reply = $twitter->search($url);

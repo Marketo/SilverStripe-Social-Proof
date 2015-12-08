@@ -36,14 +36,14 @@ class SocialQueue extends DataObject
         // get the latest queue and add the URL to the queue
         $queue = SocialQueue::get()->filter('Active',1)->last();
         if ($queue && $queue->exists()) {
-            $queuedUrls = (array)unserialize($queue->URLs);
+            $queuedUrls = (array)json_decode($queue->URLs, true);
         }
         $queuedUrls = (array)$queuedUrls;
         $queuedUrls[] = $url;
         if (!$queue || !$queue->exists()) {
             $queue = new SocialQueue();
         }
-        $queue->URLs = serialize($queuedUrls);
+        $queue->URLs = json_encode($queuedUrls, true);
         $queue->write();
     }
 }

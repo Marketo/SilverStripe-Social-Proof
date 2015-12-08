@@ -53,7 +53,7 @@ class  SocialProofTest extends SapphireTest {
 
         $this->assertEquals(
             $socialQueue->URLs,
-            serialize(array($this->testURL))
+            json_encode(array($this->testURL), true)
         );
         $this->assertEquals($socialQueue->Active, 1);
     }

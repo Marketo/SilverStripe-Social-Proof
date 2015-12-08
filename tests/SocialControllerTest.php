@@ -87,9 +87,10 @@ class  SocialControllerTest extends FunctionalTest {
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
         $this->assertEquals($socialQueue->Active, 1);
+        $urls = json_decode($socialQueue->URLs, true);
         $this->assertEquals(
-            $socialQueue->URLs,
-            serialize(array($this->testURL))
+            $urls[0],
+            $this->testURL
         );
     }
 
@@ -118,9 +119,10 @@ class  SocialControllerTest extends FunctionalTest {
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
         $this->assertEquals($socialQueue->Active, 1);
+        $urls = json_decode($socialQueue->URLs, true);
         $this->assertEquals(
-            $socialQueue->URLs,
-            serialize(array($this->testURL))
+            $urls[0],
+            $this->testURL
         );
     }
 
@@ -144,9 +146,10 @@ class  SocialControllerTest extends FunctionalTest {
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
         $this->assertEquals($socialQueue->Active, 1);
+        $urls = json_decode($socialQueue->URLs, true);
         $this->assertEquals(
-            $socialQueue->URLs,
-            serialize(array($this->testURL))
+            $urls[0],
+            $this->testURL
         );
     }
 
@@ -170,9 +173,10 @@ class  SocialControllerTest extends FunctionalTest {
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
         $this->assertEquals($socialQueue->Active, 1);
+        $urls = json_decode($socialQueue->URLs, true);
         $this->assertEquals(
-            $socialQueue->URLs,
-            serialize(array($this->testURL))
+            $urls[0],
+            $this->testURL
         );
     }
 
@@ -196,9 +200,10 @@ class  SocialControllerTest extends FunctionalTest {
         // confirm the URL has been requeued
         $socialQueue = SocialQueue::get()->first();
         $this->assertEquals($socialQueue->Active, 1);
+        $urls = json_decode($socialQueue->URLs, true);
         $this->assertEquals(
-            $socialQueue->URLs,
-            serialize(array($this->testURL))
+            $urls[0],
+            $this->testURL
         );
     }
 }

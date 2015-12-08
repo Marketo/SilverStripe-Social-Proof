@@ -20,7 +20,7 @@ class UpdateSocialStatsJob extends AbstractQueuedJob {
             ->last();
         if ($queue && $queue->exists()) {
             $this->URLs = (isset($queue->URLs)) 
-            ? unserialize($queue->URLs)
+            ? json_decode($queue->URLs, true)
             : array();
             $this->totalSteps = count($this->URLs);
             // stop any further urls being added to this queue

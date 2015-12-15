@@ -50,6 +50,10 @@ class SocialAPI extends Controller
                 );
             }
         }
+        $cors = Config::inst()->get('SocialAPI', 'CORS');
+        if ($cors) {
+	        $this->response->addHeader('Access-Control-Allow-Origin', '*');
+        }
         return json_encode($results);
     }
 }

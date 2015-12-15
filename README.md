@@ -50,6 +50,34 @@ http://socialproof.stripetheweb.com/api/countsfor/service/linkedin?urls=[urltobe
 http://socialproof.stripetheweb.com/api/countsfor/service/google?urls=[urltobeprocessed]
 ```
 
+## Accepting third party AJAX requests
+
+If you want to allow third party javascript requests to query the service (like AJAX) you will need to set
+the CORS flag in your yml config to true so that the `Access-Control-Allow-Origin` header gets sent back to
+the requesting browser as per the example below.
+
+```
+SocialAPI:
+  CORS: true
+```
+
+Querying the API from a third party can be done with jQuery or AJAX.
+A simple synchronous javascript example is below where you can 
+just call the function requestInfo with the host and the request.
+
+
+``` javascript
+function requestInfo(host, request) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", host + request, false);
+    xhr.send();
+
+    return xhr.response;
+}
+
+// call with the following
+// var result = requestInfo('http://192.168.0.1/', 'geoip/50.206.151.39.json');
+```
 
 ## Composer Installation
 

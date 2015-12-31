@@ -5,7 +5,8 @@
  *
  * A service to retrieve Facebook interactions for a url
  */
-class FacebookCount extends Controller implements SocialServiceInterface {
+class FacebookCount extends Controller implements SocialServiceInterface
+{
 
     public $service = 'Facebook';
     public $statistic = array(
@@ -15,18 +16,21 @@ class FacebookCount extends Controller implements SocialServiceInterface {
     );
     public $requestCount = 5;
 
-	private function getFacebookCall($urls) {
+    private function getFacebookCall($urls)
+    {
         return 'https://api.facebook.com/method/fql.query' .
             '?query=select%20url,share_count,like_count,comment_count%20' .
             'from%20link_stat%20where%20url%20in("'
             . urlencode(implode('","', $urls)).'")';
     }
 
-    public function getStatistics() {
+    public function getStatistics()
+    {
         return $this->statistic;
     }
 
-    public function processQueue($queueUrls){
+    public function processQueue($queueUrls)
+    {
         $urls = array();
         $noEntries = count($queueUrls);
         $i = 0;
@@ -38,12 +42,11 @@ class FacebookCount extends Controller implements SocialServiceInterface {
                 $urls[] = $url;
                 if ($i == $this->requestCount || $step == $noEntries) {
                     $fileData = file_get_contents($this->getFacebookCall($urls));
-                    if($fileData === FALSE) {
+                    if ($fileData === false) {
                         foreach ($urls as $errorUrl) {
                             $this->errorQueue[] = $url;
                         }
                     } else {
-
                         $xml = simplexml_load_string($fileData);
 
                         if ($xml->error_code || !$xml->link_stat) {
@@ -68,7 +71,7 @@ class FacebookCount extends Controller implements SocialServiceInterface {
                                     $statistic->write();
                                 }
                             } else {
-                                foreach($this->statistic as $countStat) {
+                                foreach ($this->statistic as $countStat) {
                                     $statistic = URLStatistics::create();
                                     $statistic->URL = $resultUrl;
                                     $statistic->Service = $this->service;
@@ -87,7 +90,8 @@ class FacebookCount extends Controller implements SocialServiceInterface {
                                             'URL' => $resultUrl,
                                             'Service' => $this->service,
                                             'Action' => $statistic
-                                        ))->first();;
+                                        ))->first();
+                                        ;
                                         if (!$stat || !$stat->exists()) {
                                             $stat = URLStatistics::create();
                                             $stat->URL = $resultUrl;
@@ -95,7 +99,7 @@ class FacebookCount extends Controller implements SocialServiceInterface {
                                             $stat->Action = $statistic;
                                             $stat->Count = (int)$result->{$statistic};
                                             $stat->write();
-                                        } 
+                                        }
                                     }
                                 }
                             }
@@ -107,7 +111,6 @@ class FacebookCount extends Controller implements SocialServiceInterface {
                     $urls = array();
                 }
             }
-
         } catch (Exception $e) {
             return 0;
         }

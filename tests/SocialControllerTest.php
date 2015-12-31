@@ -6,7 +6,8 @@
  * Some controller testing
  */
 
-class  SocialControllerTest extends FunctionalTest {
+class  SocialControllerTest extends FunctionalTest
+{
 
     private $testURL = 'http://www.marketo.com';
     private $services = array(
@@ -17,7 +18,8 @@ class  SocialControllerTest extends FunctionalTest {
         
     );
 
-    public function setUp() {
+    public function setUp()
+    {
         parent::setUp();
 
         SocialQueue::queueURL($this->testURL);
@@ -44,10 +46,10 @@ class  SocialControllerTest extends FunctionalTest {
                 unset($stat);
             }
         }
-
     }
 
-    public function tearDown() {
+    public function tearDown()
+    {
         // remove db records otherwise we end up with multiple stats
         foreach (URLStatistics::get() as $stat) {
             $stat->delete();
@@ -56,17 +58,17 @@ class  SocialControllerTest extends FunctionalTest {
             $queue->delete();
         }
         parent::tearDown();
-
     }
 
-    public function testAPI() {
+    public function testAPI()
+    {
         $request = $this->get('api/countsfor?urls=' . $this->testURL);
         $this->assertEquals($request->getStatusCode(), 200);
 
         $body = $request->getBody();
         $jsonArray = json_decode($body, true);
 
-        $results = $jsonArray['results']; 
+        $results = $jsonArray['results'];
         $www = $results[$this->testURL];
 
         foreach ($www['Facebook'] as $facebook) {
@@ -94,7 +96,8 @@ class  SocialControllerTest extends FunctionalTest {
         );
     }
 
-    public function testFacebookServiceAPI() {
+    public function testFacebookServiceAPI()
+    {
         $request = $this->get('api/countsfor/service/facebook?urls=' . $this->testURL);
         $this->assertEquals($request->getStatusCode(), 200);
 
@@ -104,11 +107,11 @@ class  SocialControllerTest extends FunctionalTest {
 
         $jsonArray = json_decode($body, true);
 
-        $results = $jsonArray['results']; 
+        $results = $jsonArray['results'];
         $www = $results[$this->testURL];
         $facebookService = new FacebookCount();
         $expectedCount = (count($facebookService->getStatistics()) * 2) + 1;
-        $this->assertEquals(count($www,true),$expectedCount);
+        $this->assertEquals(count($www, true), $expectedCount);
 
         foreach ($www['Facebook'] as $facebook) {
             foreach ($facebook as $key => $value) {
@@ -126,7 +129,8 @@ class  SocialControllerTest extends FunctionalTest {
         );
     }
 
-    public function testGoogleServiceAPI() {
+    public function testGoogleServiceAPI()
+    {
         $request = $this->get('api/countsfor/service/google?urls=' . $this->testURL);
         $this->assertEquals($request->getStatusCode(), 200);
 
@@ -136,9 +140,9 @@ class  SocialControllerTest extends FunctionalTest {
 
         $jsonArray = json_decode($body, true);
 
-        $results = $jsonArray['results']; 
+        $results = $jsonArray['results'];
         $www = $results[$this->testURL];
-        $this->assertEquals(count($www,true),3);
+        $this->assertEquals(count($www, true), 3);
 
         $facebook = $www['Google'][0];
         $this->assertEquals($facebook['count'], 50);
@@ -153,7 +157,8 @@ class  SocialControllerTest extends FunctionalTest {
         );
     }
 
-    public function testLinkedinServiceAPI() {
+    public function testLinkedinServiceAPI()
+    {
         $request = $this->get('api/countsfor/service/linkedin?urls=' . $this->testURL);
         $this->assertEquals($request->getStatusCode(), 200);
 
@@ -163,9 +168,9 @@ class  SocialControllerTest extends FunctionalTest {
 
         $jsonArray = json_decode($body, true);
 
-        $results = $jsonArray['results']; 
+        $results = $jsonArray['results'];
         $www = $results[$this->testURL];
-        $this->assertEquals(count($www,true),3);
+        $this->assertEquals(count($www, true), 3);
 
         $facebook = $www['Linkedin'][0];
         $this->assertEquals($facebook['handle_count'], 50);
@@ -180,7 +185,8 @@ class  SocialControllerTest extends FunctionalTest {
         );
     }
 
-    public function testTwitterServiceAPI() {
+    public function testTwitterServiceAPI()
+    {
         $request = $this->get('api/countsfor/service/twitter?urls=' . $this->testURL);
         $this->assertEquals($request->getStatusCode(), 200);
 
@@ -190,9 +196,9 @@ class  SocialControllerTest extends FunctionalTest {
 
         $jsonArray = json_decode($body, true);
 
-        $results = $jsonArray['results']; 
+        $results = $jsonArray['results'];
         $www = $results[$this->testURL];
-        $this->assertEquals(count($www,true),3);
+        $this->assertEquals(count($www, true), 3);
 
         $facebook = $www['Twitter'][0];
         $this->assertEquals($facebook['statuses_count'], 50);

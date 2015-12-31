@@ -26,7 +26,8 @@ class URLStatistics extends DataObject
     );
 }
 
-class URLStatisticsAdmin extends ModelAdmin {
+class URLStatisticsAdmin extends ModelAdmin
+{
     private static $managed_models = array(
         'URLStatistics'
     );
@@ -34,5 +35,4 @@ class URLStatisticsAdmin extends ModelAdmin {
     private static $url_segment = 'social-url-admin';
 
     private static $menu_title = 'Social URLs';
-
 }

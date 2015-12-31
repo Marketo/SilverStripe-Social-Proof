@@ -5,12 +5,14 @@
  *
  * A service to retrieve Twitter interactions for a url
  */
-class TwitterCount extends Controller implements SocialServiceInterface {
+class TwitterCount extends Controller implements SocialServiceInterface
+{
 
     public $service = 'Twitter';
     public $statistic = 'statuses_count';
 
-    public function processQueue($queueUrls){
+    public function processQueue($queueUrls)
+    {
         try {
             foreach ($queueUrls as $url) {
                 $twitter = new SSTwitter();

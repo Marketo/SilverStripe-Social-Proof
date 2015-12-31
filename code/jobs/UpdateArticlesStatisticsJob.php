@@ -5,25 +5,29 @@
  *
  * A job for updateing article statistics
  */
-class UpdateArticleStatisticsJob extends AbstractQueuedJob {
+class UpdateArticleStatisticsJob extends AbstractQueuedJob
+{
     /**
      * @var int
      * Rerun the job after a hour
      */
     private static $regenerate_time = 3600;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->currentStep = 0;
     }
 
-    public function getJobType() {
+    public function getJobType()
+    {
         return QueuedJob::QUEUED;
     }
 
     /**
      * @return string
      */
-    public function getTitle() {
+    public function getTitle()
+    {
         return 'A job for updating the statistics for some articles';
     }
 
@@ -32,11 +36,13 @@ class UpdateArticleStatisticsJob extends AbstractQueuedJob {
      *
      * @return string
      */
-    public function getSignature() {
+    public function getSignature()
+    {
         return md5(get_class($this));
     }
 
-    public function process() {
+    public function process()
+    {
         $this->completeJob();
         return;
     }
@@ -44,7 +50,8 @@ class UpdateArticleStatisticsJob extends AbstractQueuedJob {
     /**
      * Setup the next cron job
      */
-    protected function completeJob() {
+    protected function completeJob()
+    {
         $this->isComplete = true;
         $nextgeneration = new UpdateArticleStatisticsJob();
         singleton('QueuedJobService')

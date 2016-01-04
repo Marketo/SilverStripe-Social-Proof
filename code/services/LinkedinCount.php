@@ -5,25 +5,28 @@
  *
  * A service to retrieve Linkedin interactions for a url
  */
-class LinkedinCount extends Controller implements SocialServiceInterface {
+class LinkedinCount extends Controller implements SocialServiceInterface
+{
 
     public $service = 'Linkedin';
     public $statistic = 'handle_count';
 
-    function getLinkedInCall($url='') {
+    public function getLinkedInCall($url='')
+    {
         return 'http://www.linkedin.com/countserv/count/share?url='
             . urlencode($url);
     }
-    function processQueue($queueUrls){
+    public function processQueue($queueUrls)
+    {
         try {
             foreach ($queueUrls as $url) {
                 $fileData = file_get_contents($this->getLinkedInCall($url));
-                if ($fileData === FALSE) {
+                if ($fileData === false) {
                     $this->errorQueue[] = $url;
                     continue;
                 }
-                $output = str_replace(array('IN.Tags.Share.handleCount(',');'),'',trim($fileData));
-                if($output !== FALSE) {
+                $output = str_replace(array('IN.Tags.Share.handleCount(', ');'), '', trim($fileData));
+                if ($output !== false) {
                     $json = json_decode($output);
                     unset($fileData); // free memory
                     $count = intval($json->count);
@@ -43,7 +46,6 @@ class LinkedinCount extends Controller implements SocialServiceInterface {
                     $statistic->write();
                 }
             }
-
         } catch (Exception $e) {
             return 0;
         }

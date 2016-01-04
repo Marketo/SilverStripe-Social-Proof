@@ -17,8 +17,9 @@ class SocialAPI extends Controller
             => 'countsFor'
     );
 
-    public function countsFor() {
-        $urls = explode(',',$this->request->getVar('urls'));
+    public function countsFor()
+    {
+        $urls = explode(',', $this->request->getVar('urls'));
         // queue all urls to be checked
         foreach ($urls as $url) {
             $result = SocialQueue::queueURL($url);
@@ -52,7 +53,7 @@ class SocialAPI extends Controller
         }
         $cors = Config::inst()->get('SocialAPI', 'CORS');
         if ($cors) {
-	        $this->response->addHeader('Access-Control-Allow-Origin', '*');
+            $this->response->addHeader('Access-Control-Allow-Origin', '*');
         }
         return json_encode($results);
     }

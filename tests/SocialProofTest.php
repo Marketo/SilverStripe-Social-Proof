@@ -6,7 +6,8 @@
  * Some basic testing for the various models
  */
 
-class  SocialProofTest extends SapphireTest {
+class  SocialProofTest extends SapphireTest
+{
 
     private $testURL = 'http://www.marketo.com';
     private $services = array(
@@ -17,7 +18,8 @@ class  SocialProofTest extends SapphireTest {
         
     );
 
-    public function setUp() {
+    public function setUp()
+    {
         parent::setUp();
 
         SocialQueue::queueURL($this->testURL);
@@ -43,12 +45,12 @@ class  SocialProofTest extends SapphireTest {
                 $stat->write();
             }
         }
-
     }
 
-    public function testSocialQueue() {
+    public function testSocialQueue()
+    {
         $socialQueue = SocialQueue::get()
-            ->filter('Active',1)
+            ->filter('Active', 1)
             ->last();
 
         $this->assertEquals(
@@ -58,7 +60,8 @@ class  SocialProofTest extends SapphireTest {
         $this->assertEquals($socialQueue->Active, 1);
     }
 
-    public function testFacebookStat() {
+    public function testFacebookStat()
+    {
         $stats = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Facebook'
@@ -76,7 +79,8 @@ class  SocialProofTest extends SapphireTest {
         }
     }
 
-    public function testGooglePlusStat() {
+    public function testGooglePlusStat()
+    {
         $stat = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Google'
@@ -87,7 +91,8 @@ class  SocialProofTest extends SapphireTest {
         $this->assertEquals($stat->URL, $this->testURL);
     }
 
-    public function testLinkedinStat() {
+    public function testLinkedinStat()
+    {
         $stat = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Linkedin'
@@ -98,7 +103,8 @@ class  SocialProofTest extends SapphireTest {
         $this->assertEquals($stat->URL, $this->testURL);
     }
 
-    public function testTwitterStat() {
+    public function testTwitterStat()
+    {
         $stat = URLStatistics::get()
             ->filter(array(
                 'Service' => 'Twitter'

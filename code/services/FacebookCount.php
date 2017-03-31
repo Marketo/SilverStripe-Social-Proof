@@ -9,6 +9,7 @@ class FacebookCount extends Controller implements SocialServiceInterface
 {
 
     public $service = 'Facebook';
+
     public $statistic = array(
         'share_count',
         'like_count',
@@ -16,12 +17,9 @@ class FacebookCount extends Controller implements SocialServiceInterface
     );
     public $requestCount = 5;
 
-    private function getFacebookCall($urls)
+    private function getFacebookCall($url)
     {
-        return 'https://api.facebook.com/method/fql.query' .
-            '?query=select%20url,share_count,like_count,comment_count%20' .
-            'from%20link_stat%20where%20url%20in("'
-            . urlencode(implode('","', $urls)).'")';
+        return "http://graph.facebook.com/?id={$url}";
     }
 
     public function getStatistics()
@@ -41,72 +39,47 @@ class FacebookCount extends Controller implements SocialServiceInterface
                 $step++;
                 $urls[] = $url;
                 if ($i == $this->requestCount || $step == $noEntries) {
-                    $fileData = file_get_contents($this->getFacebookCall($urls));
-                    if ($fileData === false) {
-                        foreach ($urls as $errorUrl) {
-                            $this->errorQueue[] = $url;
-                        }
-                    } else {
-                        $xml = simplexml_load_string($fileData);
 
-                        if ($xml->error_code || !$xml->link_stat) {
-                            foreach ($urls as $errorUrl) {
-                                $this->errorQueue[] = $url;
-                                continue;
-                            }
-                        }
-                        $results = $xml->link_stat;
-                        $ids = array_flip($urls);
-                        foreach ($results as $result) {
-                            $resultUrl = (string)$result->url;
-                            $statistics = URLStatistics::get()
-                                ->filter(array(
-                                    'URL' => $resultUrl,
-                                    'Service' => $this->service,
-                                    'Action' => $this->statistic
-                                ));
-                            if ($statistics && $statistics->exists()) {
-                                foreach ($statistics as $statistic) {
-                                    $statistic->Count = (int)$result->{$statistic->Action};
-                                    $statistic->write();
-                                }
-                            } else {
-                                foreach ($this->statistic as $countStat) {
-                                    $statistic = URLStatistics::create();
-                                    $statistic->URL = $resultUrl;
-                                    $statistic->Service = $this->service;
-                                    $statistic->Action = $countStat;
-                                    $statistic->Count = (int)$result->{$statistic->Action};
-                                    $statistic->write();
-                                }
-                            }
-                            // sanity check what should be in the db and what is actually in it
-                            if (count($this->statistic) != $statistics->count()) {
-                                foreach ($this->statistic as $statistic) {
-                                    if ($result->$statistic) {
-                                        // do we have this in the db
-                                        $stat = URLStatistics::get()
-                                            ->filter(array(
-                                            'URL' => $resultUrl,
-                                            'Service' => $this->service,
-                                            'Action' => $statistic
-                                        ))->first();
-                                        ;
-                                        if (!$stat || !$stat->exists()) {
-                                            $stat = URLStatistics::create();
-                                            $stat->URL = $resultUrl;
-                                            $stat->Service = $this->service;
-                                            $stat->Action = $statistic;
-                                            $stat->Count = (int)$result->{$statistic};
-                                            $stat->write();
-                                        }
-                                    }
-                                }
-                            }
+                    $fbUrl = $this->getFacebookCall($url);
+                    $responseData = false;
+
+                    if ($fbUrl) {
+                        $responseData = json_decode(
+                            file_get_contents($fbUrl)
+                        );
+                    }
+
+                    if (!$responseData || !isset($responseData->share)) {
+                        continue;
+                    }
+
+                    $shareData = $responseData->share;
+
+                    foreach ($this->statistic as $statistic) {
+
+                        $urlStatistics = URLStatistics::get()->filter([
+                            'URL' => $url,
+                            'Service' => $this->service,
+                            'Action' => $statistic
+                        ]);
+
+                        $statisticValue = isset($shareData->{$statistic}) ? $shareData->{$statistic} : 0;
+
+                        if ($urlStatistics && $urlStatistics->exists()) {
+                            $urlStatistic = $urlStatistics->first();
+                            $urlStatistic->Count = (int)$statisticValue;
+                            $urlStatistic->write();
+                        } else {
+                            $urlStatistic = URLStatistics::create();
+                            $urlStatistic->URL = $url;
+                            $urlStatistic->Service = $this->service;
+                            $urlStatistic->Action = $statistic;
+                            $urlStatistic->Count = (int)$statisticValue;
+                            $urlStatistic->write();
                         }
                     }
 
-                    unset($fileData); // free memory
+                    unset($responseData); // free memory
                     $i = 0;
                     $urls = array();
                 }

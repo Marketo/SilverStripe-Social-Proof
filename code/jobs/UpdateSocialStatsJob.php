@@ -39,7 +39,7 @@ class UpdateSocialStatsJob extends AbstractQueuedJob
     {
         return md5(get_class($this));
     }
-    
+
     public function setup()
     {
         $this->currentStep = 0;
@@ -49,7 +49,7 @@ class UpdateSocialStatsJob extends AbstractQueuedJob
             // stop any further urls being added to this queue
             $queue->Active = 0;
             $queue->write();
-            
+
             // reload to be sure
             $queue = SocialQueue::get()->byID($queue->ID);
 
@@ -73,21 +73,29 @@ class UpdateSocialStatsJob extends AbstractQueuedJob
     public function process()
     {
         $services = array();
+
         foreach (Config::inst()->get('UpdateSocialStatsJob', 'services') as $service) {
             $services[] = $service::create();
         }
+
         $requeue = array();
+        $urls = array_unique($this->URLs);
+
         foreach ($services as $service) {
-            $errors = $service->processQueue($this->URLs);
-            foreach ($errors as $error) {
-                if (!in_array($error, $requeue)) {
-                    $requeue[] = $error;
+            $errors = $service->processQueue($urls);
+            if ($errors && count($errors)) {
+                foreach ($errors as $error) {
+                    if (!in_array($error, $requeue)) {
+                        $requeue[] = $error;
+                    }
                 }
             }
         }
+
         foreach ($requeue as $queue) {
             SocialQueue::queueURL($queue);
         }
+
         $this->currentStep = count($this->URLs);
         $this->completeJob();
     }
@@ -99,7 +107,6 @@ class UpdateSocialStatsJob extends AbstractQueuedJob
     {
         $this->isComplete = true;
         $nextgeneration = new UpdateSocialStatsJob();
-        singleton('QueuedJobService')
-            ->queueJob($nextgeneration, date('Y-m-d H:i:s', time() + self::$regenerate_time));
+        singleton('QueuedJobService')->queueJob($nextgeneration, date('Y-m-d H:i:s', time() + self::$regenerate_time));
     }
 }

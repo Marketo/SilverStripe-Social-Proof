@@ -43,6 +43,9 @@ class SocialQueue extends DataObject
         }
         $queuedUrls = (array)$queuedUrls;
         $queuedUrls[] = $url;
+
+        $queuedUrls = array_unique($queuedUrls);
+
         if (!$queue || !$queue->exists()) {
             $queue = new SocialQueue();
         }

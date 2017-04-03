@@ -16,13 +16,35 @@ class SocialAPI extends Controller
         => 'countsFor'
     );
 
+    private static $allowed_origins = [];
+
     public function countsFor()
     {
         $response = $this->getResponse();
         $cors = Config::inst()->get('SocialAPI', 'CORS');
 
-        if ($cors) {
-            $response->addHeader('Access-Control-Allow-Origin', '*');
+        $allowedOrigins = Config::inst()->get('SocialAPI', 'allowed_origins');
+
+        if (count($allowedOrigins) && $cors) {
+            $origin = isset($_SERVER['HTTP_ORIGIN']) ?: false;
+
+            if ($origin) {
+                foreach ($allowedOrigins as $allowedOrigin) {
+                    if ($origin == $allowedOrigin) {
+                        $response->addHeader('Access-Control-Allow-Origin', $origin);
+                        break;
+                    } elseif (strpos($allowedOrigin, '*') >= 0) {
+                        if (fnmatch($allowedOrigin, $origin)) {
+                            $response->addHeader('Access-Control-Allow-Origin', $origin);
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            if (!count($allowedOrigins) && $cors) {
+                $response->addHeader('Access-Control-Allow-Origin', '*');
+            }
         }
 
         $urls = explode(',', $this->request->getVar('urls'));

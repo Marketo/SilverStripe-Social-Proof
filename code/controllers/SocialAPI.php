@@ -21,29 +21,32 @@ class SocialAPI extends Controller
     public function countsFor()
     {
         $response = $this->getResponse();
-        $cors = Config::inst()->get('SocialAPI', 'CORS');
+        $cors = $this->stat('cors_allowed_origins');
+        $requestOrigin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : false;
 
-        $allowedOrigins = Config::inst()->get('SocialAPI', 'allowed_origins');
+        // handle this if is not array, i.e. if single string or if *
 
-        if (count($allowedOrigins) && $cors) {
-            $origin = isset($_SERVER['HTTP_ORIGIN']) ?: false;
-
-            if ($origin) {
-                foreach ($allowedOrigins as $allowedOrigin) {
-                    if ($origin == $allowedOrigin) {
-                        $response->addHeader('Access-Control-Allow-Origin', $origin);
+        if ($cors && $requestOrigin) {
+            if (is_array($cors) && count($cors)) {
+                foreach ($cors as $corsOrigin) {
+                    if ($requestOrigin == $corsOrigin) {
+                        $response->addHeader('Access-Control-Allow-Origin', $requestOrigin);
                         break;
-                    } elseif (strpos($allowedOrigin, '*') >= 0) {
-                        if (fnmatch($allowedOrigin, $origin)) {
-                            $response->addHeader('Access-Control-Allow-Origin', $origin);
+                    } elseif (strpos($corsOrigin, '*') !== false) {
+                        if (fnmatch($corsOrigin, $requestOrigin)) {
+                            $response->addHeader('Access-Control-Allow-Origin', $requestOrigin);
                             break;
                         }
                     }
                 }
-            }
-        } else {
-            if (!count($allowedOrigins) && $cors) {
-                $response->addHeader('Access-Control-Allow-Origin', '*');
+            } else {
+                if ($requestOrigin === $cors) {
+                    $response->addHeader('Access-Control-Allow-Origin', $requestOrigin);
+                } elseif (strpos($cors, '*') !== false) {
+                    if (fnmatch($cors, $requestOrigin)) {
+                        $response->addHeader('Access-Control-Allow-Origin', $requestOrigin);
+                    }
+                }
             }
         }
 

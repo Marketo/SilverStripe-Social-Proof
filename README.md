@@ -90,7 +90,17 @@ If you want to map development domains to production domains, you can use the fo
 
 ```SocialAPI:
  domain_mapping:
-   localdomain.dev: blog4.marketo.com```
+   localdomain.dev: blog4.marketo.com
+```
+
+Domains can also use wildcards for matching subdomains:
+
+```SocialAPI:
+  allowed_domains:
+    - *.marketo.com
+  allowed_domains:
+    - *domain.dev: blog4.marketo.com
+```
 
 
 ## Composer Installation

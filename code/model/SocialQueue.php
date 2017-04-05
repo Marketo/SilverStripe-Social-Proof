@@ -5,7 +5,6 @@
  *
  * A data class representing a queue of social media urls to be processed
  */
-
 class SocialQueue extends DataObject
 {
     private static $singular_name = 'Social Queue';

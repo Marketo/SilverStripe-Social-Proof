@@ -109,20 +109,22 @@ class SocialAPI extends Controller
         $domain_mapping = $this->stat('domain_mapping');
         $urlParts = parse_url($url);
 
-        if(count($domain_mapping)) foreach($domain_mapping as $fromDomain => $toDomain) {
-            if(fnmatch($fromDomain, $urlParts['host'])) {
-                $urlParts['host'] = $toDomain;
-                break;
+        if (count($domain_mapping)) {
+            foreach ($domain_mapping as $fromDomain => $toDomain) {
+                if (fnmatch($fromDomain, $urlParts['host'])) {
+                    $urlParts['host'] = $toDomain;
+                    break;
+                }
             }
         }
 
         $domains = $this->stat('allowed_domains');
 
-        if(in_array($urlParts['host'], $domains)) {
+        if (in_array($urlParts['host'], $domains)) {
             return $this->rebuildURL($urlParts);
-        }else {
-            foreach($domains as $domain) {
-                if(fnmatch($urlParts['host'], $domain)) {
+        } else {
+            foreach ($domains as $domain) {
+                if (fnmatch($urlParts['host'], $domain)) {
                     $this->rebuildURL($urlParts);
                 }
             }
@@ -131,7 +133,8 @@ class SocialAPI extends Controller
         return false;
     }
 
-    public function rebuildURL($parts) {
+    public function rebuildURL($parts)
+    {
         $url = isset($parts['scheme']) ? "{$parts['scheme']}://" : 'http://';
         $url .= $parts['host'];
         $url .= isset($parts['path']) ? $parts['path'] : null;

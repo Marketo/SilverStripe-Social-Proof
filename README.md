@@ -56,15 +56,9 @@ If you want to allow third party javascript requests to query the service (like 
 the CORS flag in your yml config to true so that the `Access-Control-Allow-Origin` header gets sent back to
 the requesting browser as per the example below.
 
-```
-SocialAPI:
-  CORS: true
-```
-
 Querying the API from a third party can be done with jQuery or AJAX.
 A simple synchronous javascript example is below where you can 
 just call the function requestInfo with the host and the request.
-
 
 ``` javascript
 function requestInfo(host, request) {
@@ -78,6 +72,36 @@ function requestInfo(host, request) {
 // call with the following
 // var result = requestInfo('http://192.168.0.1/', 'geoip/50.206.151.39.json');
 ```
+
+```
+SocialAPI:
+  allow_cors: true
+```
+
+You can also add an IP whitelist for the domains that you want to be processed by using:
+
+```
+SocialAPI:
+  allowed_domains:
+    - blog4.marketo.com
+```
+
+If you want to map development domains to production domains, you can use the following:
+
+```SocialAPI:
+ domain_mapping:
+   localdomain.dev: blog4.marketo.com
+```
+
+Domains can also use wildcards for matching subdomains:
+
+```SocialAPI:
+  allowed_domains:
+    - *.marketo.com
+  allowed_domains:
+    - *domain.dev: blog4.marketo.com
+```
+
 
 ## Composer Installation
 
